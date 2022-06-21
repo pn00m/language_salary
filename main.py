@@ -7,9 +7,9 @@ from terminaltables import AsciiTable
 
 
 def predict_rub_salary(min_salary, max_salary):
-    if min_salary is None:
+    if not(min_salary):
         return max_salary * 0.8
-    if max_salary is None:
+    if not(max_salary):
         return min_salary * 1.2
     return (max_salary + min_salary) / 2
 
@@ -21,7 +21,8 @@ def hh_salary_statistics(programming_languages):
         sum_language_salary_hh = 0
         vacancies_processed_hh = 0
         total_language_vacancies_hh = 0
-        for page in range(20):
+        total_pages = 20
+        for page in range(total_pages):
             params = {
                 'text': f'Программист {language}',
                 'area': 1,
@@ -38,7 +39,7 @@ def hh_salary_statistics(programming_languages):
             for vacancy in vacancies['items']:
                 total_language_vacancies_hh += 1
                 salary = vacancy['salary']
-                if salary is None or salary['currency'] != 'RUR':
+                if not(salary) or salary['currency'] != 'RUR':
                     continue
                 min_salary = salary['from']
                 max_salary = salary['to']
@@ -55,7 +56,6 @@ def hh_salary_statistics(programming_languages):
 
 
 def superjob_salary_statistics(programming_languages):
-    load_dotenv()
     superjob_api_key = os.environ['SUPERJOB_API_KEY']
     language_stats_superjob = {}
     for language in programming_languages:
@@ -108,7 +108,6 @@ def print_table(title, language_stats):
         )
     ]
     for language in language_stats:
-        # print(language)
         table_data.append(
             [
                 language,
@@ -123,6 +122,7 @@ def print_table(title, language_stats):
 
 
 def main():
+    load_dotenv()
     programming_languages = (
         'JavaScript',
         'Java',
