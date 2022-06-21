@@ -15,12 +15,12 @@ def predict_rub_salary(min_salary, max_salary):
 
 
 def hh_salary_statistics(programming_languages):
-    language_stats_hh = {}
+    language_stats = {}
     hh_api_link = 'https://api.hh.ru/vacancies'
     for language in programming_languages:
-        sum_language_salary_hh = 0
-        vacancies_processed_hh = 0
-        total_language_vacancies_hh = 0
+        sum_language_salary = 0
+        vacancies_processed = 0
+        total_language_vacancies = 0
         total_pages = 20
         for page in range(total_pages):
             params = {
@@ -37,31 +37,31 @@ def hh_salary_statistics(programming_languages):
                                 )
             vacancies = response.json()
             for vacancy in vacancies['items']:
-                total_language_vacancies_hh += 1
+                total_language_vacancies += 1
                 salary = vacancy['salary']
                 if not(salary) or salary['currency'] != 'RUR':
                     continue
                 min_salary = salary['from']
                 max_salary = salary['to']
-                vacancy_salary_hh = predict_rub_salary(min_salary, max_salary)
-                sum_language_salary_hh += vacancy_salary_hh
-                vacancies_processed_hh += 1
-        average_salary_hh = int(sum_language_salary_hh/vacancies_processed_hh)
-        language_stats_hh[language] = {
+                vacancy_salary = predict_rub_salary(min_salary, max_salary)
+                sum_language_salary += vacancy_salary
+                vacancies_processed += 1
+        average_salary = int(sum_language_salary/vacancies_processed)
+        language_stats[language] = {
             'vacancies_found': vacancies['found'],
-            'vacancies_processed': vacancies_processed_hh,
-            'average_salary': average_salary_hh
+            'vacancies_processed': vacancies_processed,
+            'average_salary': average_salary
             }
-    print_table('HeadHunter Moscow', language_stats_hh)
+    print_table('HeadHunter Moscow', language_stats)
 
 
 def superjob_salary_statistics(programming_languages):
     superjob_api_key = os.environ['SUPERJOB_API_KEY']
-    language_stats_superjob = {}
+    language_stats = {}
     for language in programming_languages:
-        sum_language_salary_superjob = 0
-        vacancies_processed_superjob = 0
-        total_language_vacancies_superjob = 0
+        sum_language_salary = 0
+        vacancies_processed = 0
+        total_language_vacancies = 0
         for page in range(10):
             headers_superjob = {
                 'X-Api-App-Id': superjob_api_key,
@@ -78,24 +78,24 @@ def superjob_salary_statistics(programming_languages):
                             )
             vacancies = response.json()
             for vacancy in vacancies['objects']:
-                total_language_vacancies_superjob += 1
+                total_language_vacancies += 1
                 min_salary = vacancy['payment_from']
                 max_salary = vacancy['payment_to']
                 if (min_salary == 0 and max_salary == 0) \
                     	or (vacancy['currency'] != 'rub'):
                         	continue
-                vacancy_salary_superjob =\
+                vacancy_salary =\
                     predict_rub_salary(min_salary, max_salary)
-                sum_language_salary_superjob += vacancy_salary_superjob
-                vacancies_processed_superjob += 1
-        average_salary_superjob =\
-            int(sum_language_salary_superjob/vacancies_processed_superjob)
-        language_stats_superjob[language] = {
-            'vacancies_found': total_language_vacancies_superjob,
-            'vacancies_processed': vacancies_processed_superjob,
-            'average_salary': average_salary_superjob
+                sum_language_salary += vacancy_salary
+                vacancies_processed += 1
+        average_salary =\
+            int(sum_language_salary/vacancies_processed)
+        language_stats[language] = {
+            'vacancies_found': total_language_vacancies,
+            'vacancies_processed': vacancies_processed,
+            'average_salary': average_salary
             }
-    print_table('Superjob Moscow', language_stats_superjob)
+    print_table('Superjob Moscow', language_stats)
 
 
 def print_table(title, language_stats):
