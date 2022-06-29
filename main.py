@@ -44,7 +44,9 @@ def hh_salary_statistics(vacancies):
         vacancy_salary = predict_rub_salary(min_salary, max_salary)
         page_sum_language_salary += vacancy_salary
         page_vacancies_processed += 1
-    return page_language_vacancies, page_sum_language_salary, page_vacancies_processed
+    return page_language_vacancies,
+    page_sum_language_salary,
+    page_vacancies_processed
 
 
 def sj_salary_statistics(vacancies):
@@ -61,13 +63,14 @@ def sj_salary_statistics(vacancies):
         vacancy_salary = predict_rub_salary(min_salary, max_salary)
         page_sum_language_salary += vacancy_salary
         page_vacancies_processed += 1
-    return page_language_vacancies, page_sum_language_salary, page_vacancies_processed
-
+    return page_language_vacancies,
+    page_sum_language_salary,
+    page_vacancies_processed
 
 
 def main():
     load_dotenv()
-    superjob_api_key = os.environ['SUPERJOB_API_KEY']      
+    superjob_api_key = os.environ['SUPERJOB_API_KEY']
     programming_languages = (
         'JavaScript',
         'Java',
@@ -85,14 +88,12 @@ def main():
             'table_name': 'HeadHunter Moscow',
             'api_link': 'https://api.hh.ru/vacancies',
             'params': {
-                # 'text': f'Программист {language}',
                 'area': 1,
                 'only_with_salary': True,
                 'period': 30,
-                # 'page': page,
                 'per_page': 100
             },
-            'headers': {}            
+            'headers': {}
         },
         'superjob': {
             'table_name': 'Superjob Moscow',
@@ -104,10 +105,7 @@ def main():
                 'X-Api-App-Id': superjob_api_key,
             }
         }
-        
     }
-
-
     for job_site in job_sites:
         table_data = []
         table_name = job_sites[job_site]['table_name']
@@ -120,9 +118,11 @@ def main():
             sum_language_salary = 0
             for page in range(total_pages):
                 if job_site == 'headhunter':
-                    job_sites[job_site]['params']['text'] = f'Программист {language}'
+                    job_sites[job_site]['params']['text'] =\
+                         f'Программист {language}'
                 else:
-                    job_sites[job_site]['params']['keyword'] = f'Программист {language}'
+                    job_sites[job_site]['params']['keyword'] =\
+                         f'Программист {language}'
                 job_sites[job_site]['params']['page'] = page
                 params = job_sites[job_site]['params']
                 headers = job_sites[job_site]['headers']
@@ -131,21 +131,26 @@ def main():
                                     params=params,
                                     headers=headers
                                     )
+                response.raise_for_status
                 vacancies = response.json()
                 if job_site == 'headhunter':
-                    page_language_vacancies, page_language_salary, page_vacancies_processed = hh_salary_statistics(vacancies)
+                    page_language_vacancies,
+                    page_language_salary,
+                    page_vacancies_processed = hh_salary_statistics(vacancies)
                 else:
-                    page_language_vacancies, page_language_salary, page_vacancies_processed = sj_salary_statistics(vacancies)
-                total_language_vacancies = total_language_vacancies + page_language_vacancies
-                sum_language_salary = sum_language_salary + page_language_salary
-                vacancies_processed = vacancies_processed + page_vacancies_processed
+                    page_language_vacancies,
+                    page_language_salary,
+                    page_vacancies_processed = sj_salary_statistics(vacancies)
+                total_language_vacancies += page_language_vacancies
+                sum_language_salary += page_language_salary
+                vacancies_processed += page_vacancies_processed
             average_salary = int(sum_language_salary/vacancies_processed)
             language_stats.extend(
                 [
-                language,
-                total_language_vacancies,
-                vacancies_processed,
-                average_salary
+                    language,
+                    total_language_vacancies,
+                    vacancies_processed,
+                    average_salary
                 ]
                 )
             table_data.append(language_stats)
